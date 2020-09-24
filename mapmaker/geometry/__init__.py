@@ -101,6 +101,7 @@ def extend_line(geometry):
 
 class LineMatcher(object):
     def __init__(self, first_line):
+        print("Matching", first_line)
         self._previous = LineString(first_line)
         self._coords = []
 
@@ -117,6 +118,7 @@ class LineMatcher(object):
         return self._previous
 
     def extend(self, line):
+        print("  extending", line)
         pt = self._previous.intersection(line)
         if not pt.is_empty:
             where = self._previous.project(pt, True)
