@@ -66,7 +66,6 @@ METRES_PER_EMU = 0.1   ## This to become a command line parameter...
 #===============================================================================
 
 class GeoJsonOutput(object):
-
     def initialise_geojson_output(self):
     #===================================
         self.__geojson_layers = {

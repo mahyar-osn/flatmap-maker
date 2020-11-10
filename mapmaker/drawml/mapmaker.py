@@ -37,23 +37,6 @@ from properties import JsonProperties
 
 #===============================================================================
 
-# Internal PPT units are EMUs (English Metric Units)
-
-EMU_PER_CM  = 360000
-EMU_PER_IN  = 914400
-
-DOTS_PER_IN = 96
-
-EMU_PER_DOT = EMU_PER_IN/DOTS_PER_IN
-
-#===============================================================================
-
-def cm_coords(x, y):
-#===================
-    return (x/EMU_PER_CM, y/EMU_PER_CM)
-
-#===============================================================================
-
 class Feature(object):
     def __init__(self, feature_id, geometry, properties, has_children=False):
         self.__feature__id = feature_id
@@ -317,7 +300,6 @@ class MapMaker(object):
     #==========================
         # Set feature ids of path components
         self.__json_properties.resolve_pathways(self.__id_to_feature, self.__class_to_feature)
-
 
     def save_feature_id(self, feature):
     #==================================
