@@ -49,7 +49,7 @@ from flatmap import Layer
 
 from geometry import connect_dividers, extend_line, make_boundary
 from geometry import mercator_transform, mercator_transformer
-from geometry import bezier_sample, ellipse_point, transform_point
+from geometry import bezier_sample, ellipse_point, scale_point, transform_point
 from geometry import save_geometry
 
 from .arc_to_bezier import path_from_arc, tuple2
@@ -390,16 +390,17 @@ class GeoJsonLayer(GeoJsonOutput, SlideLayer):
 
             for c in path.getchildren():
                 if   c.tag == DML('arcTo'):
-                    wR = pptx_geometry.attrib_value(c, 'wR')
-                    hR = pptx_geometry.attrib_value(c, 'hR')
+                    (wR, hR) = tuple(scale_point(T, (pptx_geometry.attrib_value(c, 'wR'),
+                                                     pptx_geometry.attrib_value(c, 'hR'))))
                     stAng = radians(pptx_geometry.attrib_value(c, 'stAng'))
                     swAng = radians(pptx_geometry.attrib_value(c, 'swAng'))
-                    p1 = ellipse_point(T, wR, hR, stAng)
-                    p2 = ellipse_point(T, wR, hR, stAng + swAng)
-                    pt = transform_point(T, (current_point[0] - p1[0] + p2[0],
-                                             current_point[1] - p1[1] + p2[1]))
-                    large_arc_flag = 1 if swAng >= math.pi else 0
-                    path = path_from_arc(tuple2(wR, hR), 0, large_arc_flag, 1,
+                    p1 = ellipse_point(wR, hR, stAng)
+                    p2 = ellipse_point(wR, hR, stAng + swAng)
+                    pt = (current_point[0] + p1[0] - p2[0],
+                          current_point[1] - p1[1] + p2[1])
+                    large_arc_flag = 0 if swAng >= math.pi else 1
+                    path = path_from_arc(tuple2(wR, hR),
+                                         0, large_arc_flag, 1,
                                          tuple2(*current_point), tuple2(*pt))
                     bezier_segments.extend(path.asSegments())
                     coordinates.extend(bezier_sample(path))

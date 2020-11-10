@@ -18,10 +18,12 @@
 #
 #===============================================================================
 
-import math
+from math import sqrt, sin, cos
 import warnings
 
 #===============================================================================
+
+import numpy as np
 
 import pyproj
 
@@ -61,18 +63,22 @@ def mercator_transform(geometry):
 
 #===============================================================================
 
+def scale_point(transform, point):
+#=================================
+    return np.array([transform[0, 0]*point[0], transform[1, 1]*point[1]])
+
 def transform_point(transform, point):
 #=====================================
     return (transform@[point[0], point[1], 1.0])[:2]
 
 #===============================================================================
 
-def ellipse_point(transform, a, b, theta):
-#=========================================
+def ellipse_point(a, b, theta):
+#==============================
     a_sin_theta = a*sin(theta)
     b_cos_theta = b*cos(theta)
     circle_radius = sqrt(a_sin_theta**2 + b_cos_theta**2)
-    return transform_point(transform, (a*b_cos_theta/circle_radius, b*a_sin_theta/circle_radius))
+    return (a*b_cos_theta/circle_radius, b*a_sin_theta/circle_radius)
 
 def bezier_sample(bz, points=100):
 #=================================
@@ -88,7 +94,7 @@ def extend_(p0, p1):
     """
     dx = p1[0] - p0[0]
     dy = p1[1] - p0[1]
-    l = math.sqrt(dx*dx + dy*dy)
+    l = sqrt(dx*dx + dy*dy)
     scale = (LINE_EXTENSION + l)/l if l > 0 else 0.0
     return (p0[0] + scale*dx, p0[1] + scale*dy)
 

@@ -101,7 +101,9 @@ def path_from_arc(r, phi, flagA, flagS, p1, p2):
         t += dt
     control_points = (BezierPoint(*cp) for cp in cubic_bezier_control_points(c, r_abs, phi, t, lambda2))
     segments.append(CubicBezier(*(tuple(control_points)[:3]), BezierPoint(*p2)))
-    return BezierPath.fromSegments(segments)
+    path = BezierPath.fromSegments(segments)
+    path.closed = False
+    return path
 
 #===============================================================================
 
