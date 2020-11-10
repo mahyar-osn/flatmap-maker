@@ -328,19 +328,28 @@ class Flatmap(object):
                         ]
         if not compressed:
             tippe_command.append('--no-tile-compression')
-        subprocess.run(tippe_command
-                       + list(["-L{}".format(json.dumps(input)) for input in self.__tippe_inputs])
-                      )
+
+        tippe_command.extend(["-L{}".format(json.dumps(input)) for input in self.__tippe_inputs])
+
+        subprocess.run(tippe_command)
+
+        # The resulting MapBox tiles -- they are stored in SQLite3 database
+        tile_db = MBTiles(self.__mbtiles_file)
+
+        # Set compressed option for the map server
+        tile_db.add_metadata(compressed=compressed)
 
         # `tippecanoe` uses the bounding box containing all features as the
         # map bounds, which is not the same as the extracted bounds, so update
         # the map's metadata
-        tile_db = MBTiles(self.__mbtiles_file)
-        tile_db.add_metadata(compressed=compressed)
         tile_db.update_metadata(center=','.join([str(x) for x in self.__centre]),
                                 bounds=','.join([str(x) for x in self.__bounds]))
+
+        # We are finished with the database, so close and commit
         tile_db.execute("COMMIT")
-        tile_db.close();
+        tile_db.close()
+
+        # Add database to our list of files to upload
         self.add_upload_files(['index.mbtiles'])
 
     def map_layers(self):
