@@ -53,8 +53,8 @@ from geometry import bezier_sample, ellipse_point, transform_point
 from geometry import save_geometry
 
 from .arc_to_bezier import path_from_arc, tuple2
-from .mapmaker import Feature, FeaturesValueError
 from .formula import Geometry, radians
+from .mapmaker import Feature, FeaturesValueError
 from .mapmaker import MapMaker, SlideLayer
 from .presets import DML
 from .transform import DrawMLTransform
@@ -576,7 +576,7 @@ class GeoJsonMaker(MapMaker):
         detail_layers = []
         for layer in layers_dict.values():
             if not layer.hidden and layer.detail_features:
-                detail_layer = DetailsLayer('{}-details'.format(layer.id), self)
+                detail_layer = DetailsLayer('{}_details'.format(layer.id), self)
                 detail_layers.append(detail_layer)
                 self.add_detail_features(layer, detail_layer, layer.detail_features, layers_dict)
         return detail_layers
