@@ -65,10 +65,18 @@ def transform_point(transform, point):
 #=====================================
     return (transform@[point[0], point[1], 1.0])[:2]
 
-def transform_bezier_samples(transform, bz):
-#===========================================
-    samples = 100
-    return [transform_point(transform, (pt.x, pt.y)) for pt in bz.sample(samples)]
+#===============================================================================
+
+def ellipse_point(transform, a, b, theta):
+#=========================================
+    a_sin_theta = a*sin(theta)
+    b_cos_theta = b*cos(theta)
+    circle_radius = sqrt(a_sin_theta**2 + b_cos_theta**2)
+    return transform_point(transform, (a*b_cos_theta/circle_radius, b*a_sin_theta/circle_radius))
+
+def bezier_sample(bz, points=100):
+#=================================
+    return [(pt.x, pt.y) for pt in bz.sample(points)]
 
 #===============================================================================
 

@@ -52,13 +52,6 @@ def cm_coords(x, y):
 #===================
     return (x/EMU_PER_CM, y/EMU_PER_CM)
 
-def ellipse_point(a, b, theta):
-#==============================
-    a_sin_theta = a*sin(theta)
-    b_cos_theta = b*cos(theta)
-    circle_radius = sqrt(a_sin_theta**2 + b_cos_theta**2)
-    return (a*b_cos_theta/circle_radius, b*a_sin_theta/circle_radius)
-
 #===============================================================================
 
 class Feature(object):

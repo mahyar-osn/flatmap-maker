@@ -49,12 +49,11 @@ from flatmap import Layer
 
 from geometry import connect_dividers, extend_line, make_boundary
 from geometry import mercator_transform, mercator_transformer
-from geometry import transform_bezier_samples, transform_point
+from geometry import bezier_sample, ellipse_point, transform_point
 from geometry import save_geometry
 
 from .arc_to_bezier import path_from_arc, tuple2
 from .mapmaker import Feature, FeaturesValueError
-from .mapmaker import ellipse_point
 from .formula import Geometry, radians
 from .mapmaker import MapMaker, SlideLayer
 from .presets import DML
@@ -395,19 +394,19 @@ class GeoJsonLayer(GeoJsonOutput, SlideLayer):
                     hR = pptx_geometry.attrib_value(c, 'hR')
                     stAng = radians(pptx_geometry.attrib_value(c, 'stAng'))
                     swAng = radians(pptx_geometry.attrib_value(c, 'swAng'))
-                    p1 = ellipse_point(wR, hR, stAng)
-                    p2 = ellipse_point(wR, hR, stAng + swAng)
-                    pt = (current_point[0] - p1[0] + p2[0],
-                          current_point[1] - p1[1] + p2[1])
+                    p1 = ellipse_point(T, wR, hR, stAng)
+                    p2 = ellipse_point(T, wR, hR, stAng + swAng)
+                    pt = transform_point(T, (current_point[0] - p1[0] + p2[0],
+                                             current_point[1] - p1[1] + p2[1]))
                     large_arc_flag = 1 if swAng >= math.pi else 0
                     path = path_from_arc(tuple2(wR, hR), 0, large_arc_flag, 1,
                                          tuple2(*current_point), tuple2(*pt))
-                    coordinates.extend(transform_bezier_samples(T, path))
+                    coordinates.extend(bezier_sample(path))
                     current_point = pt
 
                 elif c.tag == DML('close'):
-                    if first_point is not None and current_point != first_point:
-                        coordinates.append(transform_point(T, first_point))
+                    if first_point is not None and (current_point != first_point).any():
+                        coordinates.append(first_point)
                     closed = True
                     first_point = None
                     # Close current pptx_geometry and start a new one...
@@ -415,22 +414,22 @@ class GeoJsonLayer(GeoJsonOutput, SlideLayer):
                 elif c.tag == DML('cubicBezTo'):
                     coords = [BezierPoint(*current_point)]
                     for p in c.getchildren():
-                        pt = pptx_geometry.point(p)
+                        pt = transform_point(T, pptx_geometry.point(p))
                         coords.append(BezierPoint(*pt))
                         current_point = pt
                     bz = CubicBezier(*coords)
-                    coordinates.extend(transform_bezier_samples(T, bz))
+                    coordinates.extend(bezier_sample(bz))
 
                 elif c.tag == DML('lnTo'):
-                    pt = pptx_geometry.point(c.pt)
+                    pt = transform_point(T, pptx_geometry.point(c.pt))
                     if moved:
-                        coordinates.append(transform_point(T, current_point))
+                        coordinates.append(current_point)
                         moved = False
-                    coordinates.append(transform_point(T, pt))
+                    coordinates.append(pt)
                     current_point = pt
 
                 elif c.tag == DML('moveTo'):
-                    pt = pptx_geometry.point(c.pt)
+                    pt = transform_point(T, pptx_geometry.point(c.pt))
                     if first_point is None:
                         first_point = pt
                     current_point = pt
@@ -439,11 +438,11 @@ class GeoJsonLayer(GeoJsonOutput, SlideLayer):
                 elif c.tag == DML('quadBezTo'):
                     coords = [BezierPoint(*current_point)]
                     for p in c.getchildren():
-                        pt = pptx_geometry.point(p)
+                        pt = transform_point(T, pptx_geometry.point(p))
                         coords.append(BezierPoint(*pt))
                         current_point = pt
                     bz = QuadraticBezier(*coords)
-                    coordinates.extend(transform_bezier_samples(T, bz))
+                    coordinates.extend(bezier_sample(bz))
 
                 else:
                     print('Unknown path element: {}'.format(c.tag))
