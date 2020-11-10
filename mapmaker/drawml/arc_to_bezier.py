@@ -1,7 +1,7 @@
 #===============================================================================
 #
 # Code (as Javascript) came from
-# https://stackoverflow.com/questions/43953138/significant-error-when-approximating-elliptical-arcs-with-bezier-curves-on-canva
+# https://stackoverflow.com/questions/43953138/significant-error-when-approximating-elliptical-arcs-with-bezier-curves-on-canvas
 # which was based on https://mortoray.com/2017/02/16/rendering-an-svg-elliptical-arc-as-bezier-curves/
 #
 # Original paper is at http://www.spaceroots.org/documents/ellipse/elliptical-arc.pdf
