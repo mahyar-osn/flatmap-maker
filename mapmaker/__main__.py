@@ -71,6 +71,8 @@ def main():
 
     parser.add_argument('-d', '--debug', dest='debug_xml', action='store_true',
                         help="save a slide's DrawML for debugging")
+    parser.add_argument('--save-beziers', action='store_true',
+                        help='Save Bezier curve segments as a feature property')
     parser.add_argument('-s', '--save-geojson', action='store_true',
                         help='Save GeoJSON files for each layer')
 

@@ -377,6 +377,7 @@ class GeoJsonLayer(GeoJsonOutput, SlideLayer):
     ## Returns shape's geometry as `shapely` object.
     ##
         coordinates = []
+        bezier_segments = []
         pptx_geometry = Geometry(shape)
         for path in pptx_geometry.path_list:
             bbox = (shape.width, shape.height) if path.w is None or path.h is None else (path.w, path.h)
@@ -400,6 +401,7 @@ class GeoJsonLayer(GeoJsonOutput, SlideLayer):
                     large_arc_flag = 1 if swAng >= math.pi else 0
                     path = path_from_arc(tuple2(wR, hR), 0, large_arc_flag, 1,
                                          tuple2(*current_point), tuple2(*pt))
+                    bezier_segments.extend(path.asSegments())
                     coordinates.extend(bezier_sample(path))
                     current_point = pt
 
@@ -417,6 +419,7 @@ class GeoJsonLayer(GeoJsonOutput, SlideLayer):
                         coords.append(BezierPoint(*pt))
                         current_point = pt
                     bz = CubicBezier(*coords)
+                    bezier_segments.append(bz)
                     coordinates.extend(bezier_sample(bz))
 
                 elif c.tag == DML('lnTo'):
@@ -441,6 +444,7 @@ class GeoJsonLayer(GeoJsonOutput, SlideLayer):
                         coords.append(BezierPoint(*pt))
                         current_point = pt
                     bz = QuadraticBezier(*coords)
+                    bezier_segments.append(bz)
                     coordinates.extend(bezier_sample(bz))
 
                 else:
@@ -454,6 +458,8 @@ class GeoJsonLayer(GeoJsonOutput, SlideLayer):
                 # Return a polygon if flagged as `closed`
                 coordinates.append(coordinates[0])
                 return shapely.geometry.Polygon(coordinates)
+        if self.mapmaker.settings.save_beziers and len(bezier_segments) > 0:
+            properties['bezier-segments'] = [repr(bz) for bz in bezier_segments]
         return geometry
 
 #===============================================================================
